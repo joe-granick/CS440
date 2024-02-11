@@ -1,0 +1,6 @@
+--- CS440 INTRO TO AI PROJECT FOLDER---
+--- SPRING 2024---
+
+# HW1
+
+
