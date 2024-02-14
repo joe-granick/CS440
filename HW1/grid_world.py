@@ -69,7 +69,8 @@ class GridWorld:
     def print_grid(self):
         for row in range(self.rows):
             for col in range(self.cols):
-                print self.path[row][col]
+                if self.path[row][col]: print 'O'
+                else: print 'X'
             print
 
     def main(self):
