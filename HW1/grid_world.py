@@ -94,9 +94,9 @@ class GridWorld:
         """
         Main function to create an instance of GridWorld, generate a maze, and print the grid.
         """
-        grid = GridWorld(101, 101)
+        grid = GridWorld(5, 5)
         grid.create_maze()
         grid.print_grid()
 
 if __name__ == "__main__":
-    GridWorld().main()
+    GridWorld(5,5).main()
