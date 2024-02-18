@@ -52,21 +52,33 @@ class GridWorld:
         :param x: x-coordinate of the cell.
         :param y: y-coordinate of the cell.
         """
-        if not self.valid_move(x, y):
-            return
+        stack = [(x,y)]
+        
+        while stack:
+            x,y = stack.pop()
+            #print(x,y)
+            #print()
 
-        self.visited.add((x, y))
+            if not self.valid_move(x,y):
+                continue
+            
+            self.visited.add((x, y))
+            if random.random() < 0.3:
+                continue
+            self.path[y][x] = True
 
-        # Leaves cell unvisited with a 30% probability
-        if random.random() < 0.3:
-            return
+            #if random.random() < 0.3:
+            #    continue
 
-        self.path[y][x] = True
-        moves = self.generate_moves(x, y)
-        random.shuffle(moves)
+            #print(x, y)
+            moves = self.generate_moves(x, y)
+            random.shuffle(moves)    
+            for nx, ny in moves:
+                #print("(",nx,",",ny,") ")
+                if self.valid_move(nx,ny):
+                    stack.append((nx,ny))
+        #print()
 
-        for nx, ny in moves:
-            self.dfs(nx, ny)
 
     def create_maze(self):
         """
@@ -82,21 +94,27 @@ class GridWorld:
         """
         Prints the grid, displaying 'O' for open path and 'X' for blocked path.
         """
+        
+    
         for row in range(self.rows):
             for col in range(self.cols):
                 if self.path[row][col]:
-                    print('O', end=' ')
+                    print('O', end='')
                 else:
-                    print('X', end=' ')
+                    print('X', end='')
             print()
 
     def main(self):
         """
         Main function to create an instance of GridWorld, generate a maze, and print the grid.
         """
-        grid = GridWorld(5, 5)
+        #grid = GridWorld(5, 5)
+        #grid.create_maze()
+        #grid.print_grid()
+
+        grid = GridWorld(101, 101)
         grid.create_maze()
         grid.print_grid()
 
 if __name__ == "__main__":
-    GridWorld(5,5).main()
+    GridWorld(101,101).main()
