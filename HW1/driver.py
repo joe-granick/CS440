@@ -15,6 +15,6 @@ def display_grid(grid):
     plt.show()
 
 if __name__ == "__main__":
-    file_path = 'HW1/output.txt' # 'output.txt' must be in the same directory as this file
+    file_path = 'HW1/output.txt' # make sure this is the correct path (by default you should be in CS440 folder)
     grid = read_grid_from_file(file_path)
     display_grid(grid)
