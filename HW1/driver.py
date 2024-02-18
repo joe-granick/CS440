@@ -15,6 +15,6 @@ def display_grid(grid):
     plt.show()
 
 if __name__ == "__main__":
-    file_path = 'output.txt'  # Path to file
+    file_path = 'output.txt' 
     grid = read_grid_from_file(file_path)
     display_grid(grid)
