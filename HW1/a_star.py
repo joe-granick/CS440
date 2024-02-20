@@ -61,10 +61,10 @@ class aStar:
                 
                 if not self.isValid(succ_coord):
                     self.visited[succ] = float('inf')
-                    print("out of bounds")
+                    #print("out of bounds")
                 elif not self.path[y][x]:
                     self.visited[succ] = float('inf')
-                    print(x,",",y,": ", print(x,",",y,": ",self.path[y][x]), " ", float('inf'))
+                    #print(x,",",y,": ", print(x,",",y,": ",self.path[y][x]), " ", float('inf'))
                 else:
                     self.visited[succ] = (self.visited[current]+1)
                     h_cost = self.manhattan_dist(x, y,self.goal_x, self.goal_y)
@@ -83,17 +83,17 @@ class aStar:
         print()
         """
         start_x,start_y = 0,0
-        goal_x,goal_y = 9,9
+        goal_x,goal_y = 5,5
         test_path = [
-                    [True, False, True, True, True, True, True, True, True, True],
-                    [True, False, True, True, True, True, True, True, True, True],
-                    [True, False, True, True, True, True, True, True, True, True],
-                    [True, True, False, True, True, True, True, True, True, True],
-                    [False,True,False,False, False, False, True, True, True, True],
-                    [True, True, False, True, True, True, True, True, True, True],
-                    [True, True, False, True, True, True, True, True, True, True],
-                    [True, True, False, True, True, True, True, True, True, True],
-                    [True, True, True, True, True, True, True, True, True, True],
+                    [True, False, True, True, True, True, True, False, False, True],
+                    [True, False, True, True, True, True, True, False, False, True],
+                    [True, False, True, True, True, True, True, True, False, True],
+                    [True, True, False, True, True, True, True, True, False, True],
+                    [False,True,False,False, False, False, True, False, False, True],
+                    [True, True, False, False, True, True, True, False, False, True],
+                    [True, True, False, False, False, True, True, True, False, True],
+                    [True, True, False, True, True, True, True, False, False, True],
+                    [True, True, True, True, True, True, True, True, False, True],
                     [True, True, True, True, True, True, True, True, True, True]
                     ]
         test_maze = aStar(path=test_path, start_x = start_x, start_y =start_y, goal_x=goal_x, goal_y=goal_y)
