@@ -42,9 +42,10 @@ class GridWorld:
         :param y: y-coordinate of the cell.
         :return: List of possible moves.
         """
-        return [(x - 1, y), (x + 1, y), 
-                (x, y - 1), (x, y + 1)]
-
+        moves = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+        random.shuffle(moves)  # Shuffle moves to ensure random exploration
+        return moves
+    
     def dfs(self, x, y):
         """
         Depth-first search implementation for creating the maze.
@@ -53,31 +54,23 @@ class GridWorld:
         :param y: y-coordinate of the cell.
         """
         stack = [(x,y)]
-        
         while stack:
             x,y = stack.pop()
-            #print(x,y)
-            #print()
+            if (x, y) in self.visited or not self.valid_move(x, y):
+                continue
 
-            if not self.valid_move(x,y):
-                continue
-            
             self.visited.add((x, y))
-            if random.random() < 0.3:
-                continue
+            # Mark path as true with a chance to block it randomly
             self.path[y][x] = True
 
-            #if random.random() < 0.3:
-            #    continue
+            # 30% chance of blocking some paths after marking them as part of the path
+            if random.random() < 0.3:
+                self.path[y][x] = False  # False = Block this path 
 
-            #print(x, y)
-            moves = self.generate_moves(x, y)
-            random.shuffle(moves)    
-            for nx, ny in moves:
-                #print("(",nx,",",ny,") ")
-                if self.valid_move(nx,ny):
-                    stack.append((nx,ny))
-        #print()
+            for nx, ny in self.generate_moves(x, y):
+                if self.valid_move(nx, ny):
+                    stack.append((nx, ny))
+
 
 
     def create_maze(self):
