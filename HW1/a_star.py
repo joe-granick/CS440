@@ -17,6 +17,7 @@ class aStar:
         self.start_x, self.start_y = start_x, start_y
         self.goal_x, self.goal_y = goal_x, goal_y
         self.expanded = 0
+        self.adaptive = False
 
     def manhattan_dist(self, s_x, s_y, goal_x, goal_y):
         """estimates heuristic by distance without any blocked paths"""
@@ -40,10 +41,28 @@ class aStar:
         calculates necessary info to track state for A* search
         """
         current.update_g(g_val)
-        current.set_h(self.manhattan_dist(current.get_x(), current.get_y(), g_x, g_y))
+        if not self.adaptive or current.get_coord() not in self.visited: 
+            current.set_h(self.manhattan_dist(current.get_x(), current.get_y(), g_x, g_y))
+        else:
+            current.set_h(self.visited[(g_x,g_y)]-self.visited[current.get_coord()])
         current.update_prev(prev)
         return current
     
+    def reverse_path(self,node):
+        """
+        Reverses path of a node
+        Needed to set up adaptive a_star
+        """
+        search_path = []
+        rev_search = []
+        while node.get_prev():
+            search_path.append(node.get_prev())
+            node = node.get_prev()
+        while len(search_path)>0:
+            rev_search.append(search_path.pop())
+        return rev_search
+        
+
     def a_star_fwd(self):
         """
             repeats A* from start to goal until shortest path to goal is reached
@@ -78,6 +97,17 @@ class aStar:
     def get_expanded(self):
         expanded_nodes = self.expanded
         return expanded_nodes
+    
+    def a_star_adaptive(self):
+        adaptive_searches = []
+        a_star = self.a_star_fwd()
+        self.adaptive = True
+        while a_star:
+            adaptive_searches.append(a_star)
+            a_star = self.reverse_path(a_star)
+            a_star = self.a_star_fwd()
+        return adaptive_searches
+
             
     def main(self):
         """
@@ -97,13 +127,34 @@ class aStar:
                     [True, True, True, False, True]
                     ]
 
-        test_maze = aStar(path=test_path, start_x = start_x, start_y =start_y, goal_x=goal_x, goal_y=goal_y)
-        
-        node = test_maze.a_star_fwd()
+        fwd_test_maze = aStar(path=test_path,
+                            start_x=start_x,start_y=start_y,
+                            goal_x=goal_x, goal_y=goal_y)
+        node = fwd_test_maze.a_star_fwd()
         while node.get_prev():
-            print(node.get_prev().get_coord(), ": ", test_maze.visited[node.get_prev().get_coord()])
+            print(node.get_prev().get_coord(), ": ", fwd_test_maze.visited[node.get_prev().get_coord()])
             node = node.get_prev()
-        print("expanded nodes ",test_maze.get_expanded())
+        
+        
+        bkw_test_maze = aStar(path=test_path,
+                                start_x=goal_x,start_y=goal_y,
+                                goal_x=start_x,goal_y=start_y)
+        node = bkw_test_maze.a_star_fwd()
+        while node.get_prev():
+            print(node.get_prev().get_coord(), ": ", bkw_test_maze.visited[node.get_prev().get_coord()])
+            node = node.get_prev()
+        
+        adaptive_test_maze = aStar(path=test_path,
+                            start_x=start_x,start_y=start_y,
+                            goal_x=goal_x, goal_y=goal_y)
+        adaptive = adaptive_test_maze.a_star_adaptive()
+        for i in range(0,len(adaptive)-1):
+            path = adaptive[i]
+            while path.get_prev():
+                print(path.get_prev().get_coord(), ": ", adaptive_test_maze.visited[path.get_prev().get_coord()], end='')
+                path = path.get_prev()
+        print()
+        print("expanded nodes ",adaptive_test_maze.get_expanded())
 
         
 if __name__ == "__main__":

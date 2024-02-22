@@ -34,7 +34,8 @@ class aStar:
         if coord[0] < 0 or coord[1] < 0:return False
         if coord[0] >= c or coord[1] >= r: return False
         return True
-        
+    def adaptive_h(self, node):
+        if node.get_coord    
         
     def a_star_fwd(self):
         """
@@ -95,13 +96,23 @@ class aStar:
                     [True, True, True, True, True, True, True, True, False, True],
                     [True, True, True, True, True, True, True, True, True, True]
                     ]
-        test_maze = aStar(path=test_path, start_x = start_x, start_y =start_y, goal_x=goal_x, goal_y=goal_y)
         
-        node = test_maze.a_star_fwd()
+        fwd_test_maze = aStar(path=test_path,
+                            start_x=start_x,start_y=start_y,
+                            goal_x=goal_x, goal_y=goal_y)
+        node = fwd_test_maze.a_star_fwd()
         while node.get_prev():
             print(node.get_prev().get_coord(), ": ", test_maze.visited[node.get_prev()])
             node = node.get_prev()
-
+        
+        
+        bkw_test_maze = aStar(path=test_path,
+                                start_x=goal_x,start_y=goal_y,
+                                goal_x=start_x,goal_y=start_y)
+        node = fwd_test_maze.a_star_fwd()
+        while node.get_prev():
+            print(node.get_prev().get_coord(), ": ", test_maze.visited[node.get_prev()])
+            node = node.get_prev()
         
 if __name__ == "__main__":
     aStar().main()

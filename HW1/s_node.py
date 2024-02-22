@@ -40,3 +40,7 @@ class sNode:
     def __lt__(self,other):
         return (self.g + self.h) < (other.g + other.h)
     
+    def __iter__(self):
+        for each in self.__dict__.values():
+            yield each
+    
