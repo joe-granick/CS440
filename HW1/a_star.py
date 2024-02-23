@@ -1,14 +1,8 @@
 #from Queue import PriorityQueue, PrioritizedItem
 import queue as q
-import heapq
-from queue import PriorityQueue
 from collections import defaultdict 
-import grid_world
-import random
 import s_node
 from s_node import PriorityQueueWrapper
-
-
 
 
 class aStar:
