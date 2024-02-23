@@ -9,7 +9,7 @@ def save_maze_to_file(maze, filename):
                 file.write('O' if maze.path[row][col] else 'X')
             file.write('\n')
 
-def generate_and_save_mazes(num_mazes, rows, cols, directory='mazes'):
+def generate_and_save_mazes(num_mazes, rows, cols, directory='HW1/mazes'): #again, we are assuming you are in CS440 folder directory
     if not os.path.exists(directory):
         os.makedirs(directory)
     for i in range(num_mazes):
