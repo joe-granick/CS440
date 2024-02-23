@@ -14,10 +14,15 @@ def get_valid_positions(maze):
 
 def read_maze_from_file(file_path):
     maze = []
+    expected_row_length = 101  # Expected number of characters per row
     with open(file_path, 'r') as file:
         for line in file:
-            maze.append([True if char == 'O' else False for char in line.strip()])
+            stripped_line = line.strip()
+            if len(stripped_line) != expected_row_length:
+                raise ValueError(f"Row length is {len(stripped_line)}, expected {expected_row_length}")
+            maze.append([True if char == 'O' else False for char in stripped_line])
     return maze
+
 
 def choose_random_positions(maze):
     valid_positions = get_valid_positions(maze)
@@ -54,16 +59,18 @@ def get_maze_file():
 
 def run_a_star_forward(maze_file):
     print(f"Running A* Forward on {maze_file}...")
-    maze = read_maze_from_file(maze_file)
-    start, goal = choose_random_positions(maze)
+    maze = read_maze_from_file(maze_file)  # This returns the maze as a list of lists (True/False values)
+    start, goal = choose_random_positions(maze)  # This should return ((start_x, start_y), (goal_x, goal_y))
 
-    a_star_solver = aStar(maze_file, *start, *goal)
+    # Instantiate a_star_solver with correct parameters
+    a_star_solver = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1])
     path = a_star_solver.a_star_fwd()
 
     if path:
         visualize_path(maze, path, start, goal)
     else:
         print("No path found.")
+        
 
 def run_a_star_backward(maze_file):
     print(f"Running A* backward on {maze_file}...")
