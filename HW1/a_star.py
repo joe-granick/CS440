@@ -73,6 +73,44 @@ class aStar:
                     self.frontier.put(s_node.PriorityQueueWrapper(cost_est, succ))
         print("no path found")
         return None
+    
+    def a_star_bwd(self):
+        """
+            calculates shortest path from goal to path using standard backward A* with
+            manhattan distance heuristic
+        """
+        #initialize starting cell
+        current = s_node.sNode(x=self.goal_x, y=self.goal_y)
+        self.visited[current] = 0
+        
+        self.frontier.put(s_node.PriorityQueueWrapper(float('inf'), current))
+
+        while not self.frontier.empty():
+            current = self.frontier.get().obj
+            if current.get_coord() == (self.start_x, self.start_y):
+                print("path found")
+                return current
+            successors = self.generate_succ(current)
+            for succ_coord in successors:
+                x = succ_coord[0]
+                y = succ_coord[1]
+                print(x,",", y)
+                succ = s_node.sNode(x, y, current)
+                
+                if not self.isValid(succ_coord):
+                    self.visited[succ] = float('inf')
+                    #print("out of bounds")
+                elif not self.path[y][x]:
+                    self.visited[succ] = float('inf')
+                    #print(x,",",y,": ", print(x,",",y,": ",self.path[y][x]), " ", float('inf'))
+                else:
+                    self.visited[succ] = (self.visited[current]+1)
+                    h_cost = self.manhattan_dist(x, y,self.start_x, self.start_y)
+                    cost_est = h_cost + self.visited[succ]
+                    print(x,",",y,": ",self.path[y][x], "placed at prio: ", cost_est)
+                    self.frontier.put(s_node.PriorityQueueWrapper(cost_est, succ))
+        print("no path found")
+        return None
 
             
     def main(self):
@@ -98,7 +136,7 @@ class aStar:
                     ]
         test_maze = aStar(path=test_path, start_x = start_x, start_y =start_y, goal_x=goal_x, goal_y=goal_y)
         
-        node = test_maze.a_star_fwd()
+        node = test_maze.a_star_bwd()
         while node.get_prev():
             print(node.get_prev().get_coord(), ": ", test_maze.visited[node.get_prev()])
             node = node.get_prev()

@@ -60,10 +60,11 @@ class GridWorld:
                 continue
 
             self.visited.add((x, y))
-            # Mark path as true with a chance to block it randomly
+
+            # Mark path as true (not blocked) with a chance to block it randomly
             self.path[y][x] = True
 
-            # 30% chance of blocking some paths after marking them as part of the path
+            # 30% chance of blocking
             if random.random() < 0.3:
                 self.path[y][x] = False  # False = Block this path 
 
