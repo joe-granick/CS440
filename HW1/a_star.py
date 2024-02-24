@@ -93,27 +93,38 @@ class aStar:
                     self.visited[succ.get_coord()] = new_cost
         print("no path found")
         return None
-
-    def get_expanded(self):
-        expanded_nodes = self.expanded
-        return expanded_nodes
     
-    def a_star_adaptive(self):
+    def a_star_bkw(self):
         """
-        runs fwd A* search
-        then continuously runs with g_values provided as updated h_value
-        in order to be adaptive to changing environment
-        returns a list containing each path
+            repeats A* from goal to start until shortest path to goal is reached
         """
-        adaptive_searches = []
-        a_star = self.a_star_fwd()
-        self.adaptive = True
-        while a_star:
-            adaptive_searches.append(a_star)
-            a_star = self.reverse_path(a_star)
-            a_star = self.a_star_fwd()
-        return adaptive_searches
-
+        #initialize starting cell
+        start = self.a_star(s_node.sNode(self.start_x, self.start_y), self.start_x, self.start_y, float('inf'))
+        goal = self.a_star(s_node.sNode(self.goal_x, self.goal_y), self.start_x, self.start_y, 0)
+        self.visited[(self.start_x,self.start_y)] = float('inf')
+        self.visited[(self.goal_x,self.goal_y)] = 0
+        q.heappush(self.frontier,goal)
+        
+        while self.frontier: 
+            current = q.heappop(self.frontier)
+            self.expanded+=1
+            if current.get_coord() == start.get_coord():
+                start.update_g(current.get_g()+1)
+                start.update_prev(current)
+                self.visited[start.get_coord()]=start.get_g()
+                print("start found")
+                return start
+            succesors = self.generate_succ(current)
+            new_cost = self.visited[current.get_coord()]+1
+            for succ in succesors:
+                succ = self.a_star(succ, self.start_x, self.start_y,new_cost, current)
+                if succ.get_coord() not in self.visited or new_cost < self.visited[succ.get_coord()]:
+                    q.heappush(self.frontier,succ)
+                    succ.update_g(new_cost)
+                    self.visited[succ.get_coord()] = new_cost
+        print("no path found")
+        return None
+    
             
     def main(self):
         """
@@ -126,26 +137,20 @@ class aStar:
         goal_x,goal_y = 4,4
  
         test_path = [
-                    [True, True, True, True, True],
-                    [True, True, False, True, True],
-                    [True, True, False, False, True],
-                    [True, True, False, False, True],
-                    [True, True, True, False, True]
+                    [True, False, True, True, True, True, True, False, False, True],
+                    [True, False, True, True, True, True, True, False, False, True],
+                    [True, False, True, True, True, True, True, True, False, True],
+                    [True, True, False, True, True, True, True, True, False, True],
+                    [False,True,False,False, False, False, True, False, False, True],
+                    [True, True, False, False, True, True, True, False, False, True],
+                    [True, True, False, False, False, True, True, True, False, True],
+                    [True, True, False, True, True, True, True, False, False, True],
+                    [True, True, True, True, True, True, True, True, False, True],
+                    [True, True, True, True, True, True, True, True, True, True]
                     ]
-
-        fwd_test_maze = aStar(path=test_path,
-                            start_x=start_x,start_y=start_y,
-                            goal_x=goal_x, goal_y=goal_y)
-        node = fwd_test_maze.a_star_fwd()
-        while node.get_prev():
-            print(node.get_prev().get_coord(), ": ", fwd_test_maze.visited[node.get_prev().get_coord()])
-            node = node.get_prev()
+        test_maze = aStar(path=test_path, start_x = start_x, start_y =start_y, goal_x=goal_x, goal_y=goal_y)
         
-        
-        bkw_test_maze = aStar(path=test_path,
-                                start_x=goal_x,start_y=goal_y,
-                                goal_x=start_x,goal_y=start_y)
-        node = bkw_test_maze.a_star_fwd()
+        node = test_maze.a_star_fwd()
         while node.get_prev():
             print(node.get_prev().get_coord(), ": ", bkw_test_maze.visited[node.get_prev().get_coord()])
             node = node.get_prev()
