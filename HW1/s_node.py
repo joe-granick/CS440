@@ -38,6 +38,8 @@ class sNode:
         return self.g + self.h 
 
     def __lt__(self,other):
+        if (self.g + self.h) == (other.g + other.h):
+            return (self.g) < (other.g)    
         return (self.g + self.h) < (other.g + other.h)
     
     def __iter__(self):
