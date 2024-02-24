@@ -99,6 +99,12 @@ class aStar:
         return expanded_nodes
     
     def a_star_adaptive(self):
+        """
+        runs fwd A* search
+        then continuously runs with g_values provided as updated h_value
+        in order to be adaptive to changing environment
+        returns a list containing each path
+        """
         adaptive_searches = []
         a_star = self.a_star_fwd()
         self.adaptive = True
