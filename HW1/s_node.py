@@ -5,12 +5,13 @@ import queue
 """
 
 class sNode:
-    def __init__(self, x = None, y = None, prev = None):
+    def __init__(self, x = None, y = None, prev = None,break_tie=False):
         """
         """
         self.x,self.y=x,y
         self.g,self.h = float('inf'),None
         self.prev = prev
+        self.break_tie = break_tie
     
     def update_prev(self, prev_node):
         self.prev = prev_node
@@ -39,7 +40,8 @@ class sNode:
 
     def __lt__(self,other):
         if (self.g + self.h) == (other.g + other.h):
-            return (self.g) < (other.g)    
+            if self.break_tie:
+                return (self.g) < (other.g)    
         return (self.g + self.h) < (other.g + other.h)
     
     def __iter__(self):
