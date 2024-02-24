@@ -8,13 +8,23 @@ from path_visualizer import visualize_path
 
 
 
+def extract_path(goal_node):
+    path = []
+    current = goal_node
+    while current is not None:
+        path.append((current.x, current.y))  
+        current = current.prev  
+    path.reverse()  # Reverse the path so it goes from start to goal (or goal to start)
+    return path
+
+
 def get_valid_positions(maze):
     valid_positions = [(x, y) for y, row in enumerate(maze) for x, cell in enumerate(row) if cell]
     return valid_positions
 
 def read_maze_from_file(file_path):
     maze = []
-    expected_row_length = 101  # Expected number of characters per row
+    expected_row_length = 101  # per assignment instructions
     with open(file_path, 'r') as file:
         for line in file:
             stripped_line = line.strip()
@@ -28,18 +38,16 @@ def choose_random_positions(maze):
     valid_positions = get_valid_positions(maze)
     start = random.choice(valid_positions)
     goal = random.choice(valid_positions)
-    while start == goal:  # Ensure start and goal are not the same
+    while start == goal:  
         goal = random.choice(valid_positions)
     return start, goal
 
 def generate_mazes():
-    # Your maze generation logic here
     print("Generating 50 mazes...")
     generate_and_save_mazes(50, 101, 101, 'HW1/mazes')
 
 
 def view_mazes():
-    # Your maze viewing logic here
     print("Viewing all 50 mazes...")
     display_all_mazes('HW1/mazes')
 
@@ -60,30 +68,40 @@ def get_maze_file():
 def run_a_star_forward(maze_file):
     print(f"Running A* Forward on {maze_file}...")
     maze = read_maze_from_file(maze_file)  # This returns the maze as a list of lists (True/False values)
-    start, goal = choose_random_positions(maze)  # This should return ((start_x, start_y), (goal_x, goal_y))
+    start, goal = choose_random_positions(maze)  #  return ((start_x, start_y), (goal_x, goal_y))
 
-    # Instantiate a_star_solver with correct parameters
+    # Instantiate a_star_solver
     a_star_solver = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1])
     path = a_star_solver.a_star_fwd()
 
-    if path:
-        visualize_path(maze, path, start, goal)
+    if path:  # If a path was found
+        extracted_path = extract_path(path)  # Convert the start position to a tuple
+        start_pos = (start[0], start[1]) # Convert the goal position to a tuple
+        goal_pos = (goal[0], goal[1])  # Convert the goal position to a tuple
+        print("Generating path visualization...")
+        visualize_path(maze, extracted_path, start_pos, goal_pos) # Visualize the path
     else:
         print("No path found.")
         
 
 def run_a_star_backward(maze_file):
     print(f"Running A* backward on {maze_file}...")
-    maze = read_maze_from_file(maze_file)
-    start, goal = choose_random_positions(maze)
+    maze = read_maze_from_file(maze_file)  # Read the maze
+    start, goal = choose_random_positions(maze)  # Choose start and goal positions
 
-    a_star_solver = aStar(maze_file, *start, *goal)
-    path = a_star_solver.a_star_bwd()
+   
+    a_star_solver = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1])
+    path = a_star_solver.a_star_bkw()
 
     if path:
-        visualize_path(maze, path, start, goal)
+        extracted_path = extract_path(path)  
+        start_pos = (start[0], start[1])  
+        goal_pos = (goal[0], goal[1])  
+        print("Generating path visualization...")
+        visualize_path(maze, extracted_path, start_pos, goal_pos)
     else:
         print("No path found.")
+
 
 
 def main():
@@ -96,11 +114,11 @@ def main():
         print("5 - Exit")
 
         option = input("Enter your choice: ")
-        maze_file_path = None  # Initialize maze_file_path to None (or an appropriate default)
+        maze_file_path = None  
 
         if option in ["3", "4"]:
-            maze_file = get_maze_file()  # This function should ask for input and return the filename
-            maze_file_path = f"HW1/mazes/{maze_file}"  # Construct the full path
+            maze_file = get_maze_file()  
+            maze_file_path = f"HW1/mazes/{maze_file}"  
 
         if option == "1":
             generate_mazes()

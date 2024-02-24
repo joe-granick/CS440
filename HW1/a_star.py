@@ -93,7 +93,38 @@ class aStar:
                     self.visited[succ.get_coord()] = new_cost
         print("no path found")
         return None
-
+    
+    def a_star_bkw(self):
+        """
+            repeats A* from goal to start until shortest path to goal is reached
+        """
+        #initialize starting cell
+        start = self.a_star(s_node.sNode(self.start_x, self.start_y), self.start_x, self.start_y, float('inf'))
+        goal = self.a_star(s_node.sNode(self.goal_x, self.goal_y), self.start_x, self.start_y, 0)
+        self.visited[(self.start_x,self.start_y)] = float('inf')
+        self.visited[(self.goal_x,self.goal_y)] = 0
+        q.heappush(self.frontier,goal)
+        
+        while self.frontier: 
+            current = q.heappop(self.frontier)
+            self.expanded+=1
+            if current.get_coord() == start.get_coord():
+                start.update_g(current.get_g()+1)
+                start.update_prev(current)
+                self.visited[start.get_coord()]=start.get_g()
+                print("start found")
+                return start
+            succesors = self.generate_succ(current)
+            new_cost = self.visited[current.get_coord()]+1
+            for succ in succesors:
+                succ = self.a_star(succ, self.start_x, self.start_y,new_cost, current)
+                if succ.get_coord() not in self.visited or new_cost < self.visited[succ.get_coord()]:
+                    q.heappush(self.frontier,succ)
+                    succ.update_g(new_cost)
+                    self.visited[succ.get_coord()] = new_cost
+        print("no path found")
+        return None
+    
             
     def main(self):
         """
