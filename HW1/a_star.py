@@ -124,7 +124,26 @@ class aStar:
                     self.visited[succ.get_coord()] = new_cost
         print("no path found")
         return None
+
+    def a_star_adaptive(self):
+        """
+        runs fwd A* search
+        then continuously runs with g_values provided as updated h_value
+        in order to be adaptive to changing environment
+        returns a list containing each path
+        """
+        adaptive_searches = []
+        a_star = self.a_star_fwd()
+        self.adaptive = True
+        while a_star:
+            adaptive_searches.append(a_star)
+            a_star = self.reverse_path(a_star)
+            a_star = self.a_star_fwd()
+        return adaptive_searches
     
+    def get_expanded(self):
+        expanded_nodes = self.expanded
+        return expanded_nodes
             
     def main(self):
         """
@@ -137,20 +156,27 @@ class aStar:
         goal_x,goal_y = 4,4
  
         test_path = [
-                    [True, False, True, True, True, True, True, False, False, True],
-                    [True, False, True, True, True, True, True, False, False, True],
-                    [True, False, True, True, True, True, True, True, False, True],
-                    [True, True, False, True, True, True, True, True, False, True],
-                    [False,True,False,False, False, False, True, False, False, True],
-                    [True, True, False, False, True, True, True, False, False, True],
-                    [True, True, False, False, False, True, True, True, False, True],
-                    [True, True, False, True, True, True, True, False, False, True],
-                    [True, True, True, True, True, True, True, True, False, True],
-                    [True, True, True, True, True, True, True, True, True, True]
+                    [True, True, True, True, True],
+                    [True, True, False, True, True],
+                    [True, True, False, False, True],
+                    [True, True, False, False, True],
+                    [True, True, True, False, True]
                     ]
-        test_maze = aStar(path=test_path, start_x = start_x, start_y =start_y, goal_x=goal_x, goal_y=goal_y)
         
-        node = test_maze.a_star_fwd()
+        
+        fwd_test_maze = aStar(path=test_path,
+                            start_x=start_x,start_y=start_y,
+                            goal_x=goal_x, goal_y=goal_y)
+        node = fwd_test_maze.a_star_fwd()
+        while node.get_prev():
+            print(node.get_prev().get_coord(), ": ", fwd_test_maze.visited[node.get_prev().get_coord()])
+            node = node.get_prev()
+        
+        
+        bkw_test_maze = aStar(path=test_path,
+                                start_x=goal_x,start_y=goal_y,
+                                goal_x=start_x,goal_y=start_y)
+        node = bkw_test_maze.a_star_bkw()
         while node.get_prev():
             print(node.get_prev().get_coord(), ": ", bkw_test_maze.visited[node.get_prev().get_coord()])
             node = node.get_prev()
@@ -166,7 +192,6 @@ class aStar:
                 path = path.get_prev()
         print()
         print("expanded nodes ",adaptive_test_maze.get_expanded())
-
         
 if __name__ == "__main__":
     aStar().main()
