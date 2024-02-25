@@ -1,4 +1,4 @@
-import queue
+import random
 """ 
     class for successor node organizing info relevant to A* search decisions
 
@@ -40,6 +40,8 @@ class sNode:
 
     def __lt__(self,other):
         if (self.g + self.h) == (other.g + other.h):
+            if self.g == other.g:
+                return (random.random() <0.5)
             if self.break_tie_small:
                 return (self.g) < (other.g)
             return (self.g) > (other.g)    
