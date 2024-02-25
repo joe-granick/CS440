@@ -17,6 +17,7 @@ class aStar:
         self.expanded = 0
         self.adaptive = False
         self.break_tie_small = break_tie_small
+        self.min_goal_dist = float('inf')
 
     def manhattan_dist(self, s_x, s_y, goal_x, goal_y):
         """estimates heuristic by distance without any blocked paths"""
@@ -68,29 +69,31 @@ class aStar:
         """
         #initialize starting cell
         start = self.a_star(s_node.sNode(self.start_x, self.start_y), self.goal_x, self.goal_y, 0)
-        goal = self.a_star(s_node.sNode(self.goal_x, self.goal_y), self.goal_x, self.goal_y, float('inf'))
+        #goal = self.a_star(s_node.sNode(self.goal_x, self.goal_y), self.goal_x, self.goal_y, float('inf'))
         self.visited[(self.start_x,self.start_y)] = 0
-        self.visited[(self.goal_x,self.goal_y)] = float('inf')
+        if not self.adaptive: self.visited[(self.goal_x,self.goal_y)] = float('inf')
         q.heappush(self.frontier,start)
-        
-        while self.frontier: 
+        goal = None
+
+        while self.frontier[0].get_f() < self.visited[(self.goal_x,self.goal_y)]: 
             current = q.heappop(self.frontier)
             self.expanded+=1
-            if current.get_coord() == goal.get_coord():
-                goal.update_g(current.get_g()+1)
-                goal.update_prev(current)
-                self.visited[goal.get_coord()]=goal.get_g()
-                print("goal found")
-                return goal
             succesors = self.generate_succ(current)
             new_cost = self.visited[current.get_coord()]+1
             for succ in succesors:
                 succ = self.a_star(succ, self.goal_x, self.goal_y,new_cost, current)
+                if succ.get_coord() == (self.goal_x, self.goal_y and new_cost < self.visited[(self.goal_x, self.goal_y)]):
+                    goal = succ 
                 if succ.get_coord() not in self.visited or new_cost < self.visited[succ.get_coord()]:
                     q.heappush(self.frontier,succ)
                     succ.update_g(new_cost)
                     self.visited[succ.get_coord()] = new_cost
-        print("no path found")
+            
+        if goal:
+            print("goal found")
+            return goal
+        
+        print("no path to goal")
         return None
     
     def a_star_bkw(self):
@@ -170,7 +173,7 @@ class aStar:
         while node.get_prev():
             print(node.get_prev().get_coord(), ": ", fwd_test_maze.visited[node.get_prev().get_coord()])
             node = node.get_prev()
-        
+        print("expanded nodes ",fwd_test_maze.get_expanded())
         
         bkw_test_maze = aStar(path=test_path,
                                 start_x=goal_x,start_y=goal_y,
@@ -179,7 +182,8 @@ class aStar:
         while node.get_prev():
             print(node.get_prev().get_coord(), ": ", bkw_test_maze.visited[node.get_prev().get_coord()])
             node = node.get_prev()
-        
+        print("expanded nodes ",bkw_test_maze.get_expanded())
+
         adaptive_test_maze = aStar(path=test_path,
                             start_x=start_x,start_y=start_y,
                             goal_x=goal_x, goal_y=goal_y)
