@@ -104,6 +104,24 @@ def run_a_star_backward(maze_file):
     else:
         print("No path found.")
 
+def run_a_star_adaptive(maze_file):
+    print(f"Running A* adaptive on {maze_file}...")
+    maze = read_maze_from_file(maze_file)  # Read the maze
+    start, goal = choose_random_positions(maze)  # Choose start and goal positions
+
+    a_star_solver = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=False) #always larger gvalue thus break_tie_small=False
+    path = a_star_solver.a_star_adaptive()
+
+    if path:
+        extracted_path = extract_path(path)  
+        start_pos = (start[0], start[1])  
+        goal_pos = (goal[0], goal[1])  
+        visited_nodes = set(a_star_solver.visited.keys())
+        print("Generating path visualization...")
+        visualize_path(maze, extracted_path, start_pos, goal_pos, visited_nodes, maze_file, "A* Adaptive larger g-value preference")
+    else:
+        print("No path found.")
+
 
 def main():
 
@@ -155,5 +173,4 @@ def main():
 
 
 if __name__ == "__main__":
-
     main()
