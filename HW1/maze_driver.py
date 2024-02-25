@@ -9,6 +9,14 @@ def read_grid_from_file(file_path):
             grid.append([1 if char == 'O' else 0 for char in line.strip()])
     return np.array(grid)
 
+def display_maze(file_path):
+    grid = read_grid_from_file(file_path)
+    plt.imshow(grid, cmap='gray', interpolation='nearest')
+    #make title the maze plus number example: Maze 1
+    plt.title(file_path.split('/')[2], fontsize=8)
+    plt.axis('off')  # Hide axes ticks
+    plt.show()
+
 def display_all_mazes(directory, num_mazes=50, rows=5, cols=10):
     fig, axs = plt.subplots(rows, cols, figsize=(20, 20))
     for i in range(num_mazes):

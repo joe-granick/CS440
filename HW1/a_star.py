@@ -1,8 +1,6 @@
 #from Queue import PriorityQueue, PrioritizedItem
 import heapq as q
 from collections import defaultdict 
-import grid_world
-import random
 import s_node
 
 class aStar:
@@ -10,7 +8,7 @@ class aStar:
     class to implement A* search variations for fidning the shortest path through a maze 
     on a grid
     """
-    def __init__(self, path= None, start_x = None, start_y = None, goal_x = None, goal_y = None):
+    def __init__(self, path= None, start_x = None, start_y = None, goal_x = None, goal_y = None, break_tie_small=True):
         self.path = path
         self.frontier = []
         self.visited = defaultdict()
@@ -18,6 +16,7 @@ class aStar:
         self.goal_x, self.goal_y = goal_x, goal_y
         self.expanded = 0
         self.adaptive = False
+        self.break_tie_small = break_tie_small
 
     def manhattan_dist(self, s_x, s_y, goal_x, goal_y):
         """estimates heuristic by distance without any blocked paths"""
@@ -26,7 +25,7 @@ class aStar:
     def generate_succ(self, node):
         succesors = []
         for x,y in [(-1,0),(1,0),(0,-1),(0,1)]:
-             succ = s_node.sNode(node.get_x()+x,node.get_y()+y,node)
+             succ = s_node.sNode(node.get_x()+x,node.get_y()+y,node,break_tie=self.break_tie_small)
              if self.isValid(succ.get_coord()):
                  succesors.append(succ)
         return succesors
