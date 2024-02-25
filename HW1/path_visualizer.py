@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 
-def visualize_path(maze, path, start, goal):
+def visualize_path(maze, path, start, goal, visited_nodes, file_name, search_type):
     maze_array = np.array(maze)
     plt.figure(figsize=(10, 10))
     ax = plt.gca()
@@ -12,6 +12,11 @@ def visualize_path(maze, path, start, goal):
         for x in range(maze_array.shape[1]):
             color = 'white' if maze_array[y, x] else 'black'
             ax.add_patch(plt.Rectangle((x, y), 1, 1, color=color))
+
+    # Drawing visited nodes in dark blue
+    for x, y in visited_nodes:
+        if (x, y) not in path and (x, y) != start and (x, y) != goal:  # Avoid overwriting start, goal, and path
+            ax.add_patch(plt.Rectangle((x, y), 1, 1, color='darkblue'))
 
     # Drawing the path
     for x, y in path:
@@ -28,10 +33,25 @@ def visualize_path(maze, path, start, goal):
     plt.gca().set_aspect('equal', adjustable='box')
     plt.axis('off')
 
-    # Adding legend
-    legend_elements = [Patch(facecolor='lime', edgecolor='lime', label='Start'),
-                       Patch(facecolor='red', edgecolor='red', label='Goal'),
-                       Patch(facecolor='skyblue', edgecolor='skyblue', label='Path')]
-    plt.legend(handles=legend_elements, loc='upper left')
+    # Adding legend outside the grid to the right
+    legend_elements = [
+        Patch(facecolor='lime', edgecolor='lime', label='Start'),
+        Patch(facecolor='red', edgecolor='red', label='Goal'),
+        Patch(facecolor='skyblue', edgecolor='skyblue', label='Path'),
+        Patch(facecolor='darkblue', edgecolor='darkblue', label='Explored')]
+    plt.legend(handles=legend_elements, loc='upper left', bbox_to_anchor=(1, 1))
+
+    # Adjust subplot to make room for the legend
+    plt.subplots_adjust(right=0.85)
+    
+    # Count of expanded cells
+    expanded_cells_count = len(visited_nodes)
+    
+    # Display count of expanded cells
+    plt.figtext(0.5, 0.01, f'Expanded Cells Count: {expanded_cells_count}', ha="center", fontsize=12)
+
+    # Displaying the title with file name and search type
+    title_text = f"{file_name.split('/')[2]} - {search_type}"
+    plt.title(title_text, fontsize=14, pad=20)
 
     plt.show()

@@ -1,6 +1,7 @@
 # generate_mazes.py
 from grid_world import GridWorld
 import os
+import random
 
 def save_maze_to_file(maze, filename):
     with open(filename, 'w') as file:
@@ -20,4 +21,5 @@ def generate_and_save_mazes(num_mazes, rows, cols, directory='HW1/mazes'): #agai
         print(f'Maze {i} saved to {filename}')
 
 if __name__ == "__main__":
+    random.seed(42)
     generate_and_save_mazes(50, 101, 101)
