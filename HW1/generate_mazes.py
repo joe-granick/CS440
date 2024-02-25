@@ -14,7 +14,7 @@ def generate_and_save_mazes(num_mazes, rows, cols, directory='HW1/mazes'): #agai
     if not os.path.exists(directory):
         os.makedirs(directory)
     for i in range(num_mazes):
-        random.seed(42)
+        random.seed(i)
         maze = GridWorld(rows, cols)
         maze.create_maze()
         filename = os.path.join(directory, f'maze{i}.txt')
