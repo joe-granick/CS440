@@ -9,7 +9,7 @@ class sNode:
         """
         """
         self.x,self.y=x,y
-        self.g,self.h = float('inf'),None
+        self.g,self.h = float('inf'),0
         self.prev = prev
         self.break_tie_small = break_tie
      
