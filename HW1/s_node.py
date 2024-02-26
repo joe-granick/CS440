@@ -12,6 +12,7 @@ class sNode:
         self.g,self.h = float('inf'),None
         self.prev = prev
         self.break_tie_small = break_tie
+     
     
     def update_prev(self, prev_node):
         self.prev = prev_node
@@ -37,6 +38,8 @@ class sNode:
 
     def get_f(self):
         return self.g + self.h 
+
+
 
     def __lt__(self,other):
         if (self.g + self.h) == (other.g + other.h):

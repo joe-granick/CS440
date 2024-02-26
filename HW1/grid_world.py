@@ -14,6 +14,8 @@ class GridWorld:
         self.cols = cols
         self.path = [[False for x in range(self.cols)] for y in range(self.rows)]
         self.visited = set()
+        self.start = None
+        self.goal = None
 
     def block_path(self, x, y):
         """
@@ -97,6 +99,40 @@ class GridWorld:
                 else:
                     print('X', end='')
             print()
+    def get_path(self):
+        return self.path
+    
+    def set_start_goal(self):
+        r =random.randint(0,self.rows-1)
+        c = random.randint(0,self.cols-1)
+        start = (c,r)
+        end = (c,r)
+        while not self.path[r][c]:
+            r =random.randint(0,self.rows-1)
+            c = random.randint(0,self.cols-1)
+            start = (c,r)
+            end = (c,r)
+        while not self.path[r][c] and end != start:
+            r =random.randint(0,self.rows-1)
+            c = random.randint(0,self.cols-1)
+            end = (c,r)
+        self.start = start
+        self.goal = end
+    
+    def start_coord(self):
+        return self.start
+    def start_x(self):
+        return self.start[0]
+    def start_y(self):
+        return self.start[1]
+    
+    def goal_coord(self):
+        return self.goal(self)
+    def goal_x(self):
+        return self.goal[0]
+    def goal_y(self):
+        return self.goal[1]
+
 
     def main(self):
         """
