@@ -82,7 +82,7 @@ class aStar:
             new_cost = self.visited[current.get_coord()]+1
             for succ in succesors:
                 succ = self.a_star(succ, self.goal_x, self.goal_y,new_cost, current)
-                if succ.get_coord() == (self.goal_x, self.goal_y and new_cost < self.visited[(self.goal_x, self.goal_y)]):
+                if succ.get_coord() == (self.goal_x, self.goal_y) and new_cost < self.visited[(self.goal_x, self.goal_y)]:
                     goal = succ 
                 if succ.get_coord() not in self.visited or new_cost < self.visited[succ.get_coord()]:
                     q.heappush(self.frontier,succ)
