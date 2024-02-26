@@ -48,9 +48,12 @@ class aStar:
         return current
     
     def a_star_search(self, goal):
-        goal_node = None
-        while self.frontier:
+        if not self.adaptive:
+            self.visited[goal.get_coord()] = goal.get_g()
+            goal_node = None
+        while self.frontier and self.frontier[0].get_g()<self.visited[goal.get_coord()]:
             current_node = q.heappop(self.frontier)
+            
             # If goal is found, break from the loop
             if current_node.get_coord() == goal.get_coord():
                 goal_node = current_node
@@ -89,7 +92,6 @@ class aStar:
         
         q.heappush(self.frontier, start_node)
         self.visited[start_node.get_coord()] = start_node.get_g()
-        self.visited[goal_node.get_coord()] = goal_node.get_g()
         goal = self.a_star_search(goal=goal_node)
         return goal 
 
@@ -110,7 +112,6 @@ class aStar:
         
         q.heappush(self.frontier, start_node)
         self.visited[start_node.get_coord()] = start_node.get_g()
-        self.visited[goal_node.get_coord()] = goal_node.get_g()
         
         goal = self.a_star_search(goal=goal_node)
         return goal
@@ -120,7 +121,7 @@ class aStar:
         Runs A* search adaptively, updating heuristics based on previous searches.
         """
         adaptive_searches = []
-        self.adaptive = True  # Enable adaptive mode for heuristic updates
+          # Enable adaptive mode for heuristic updates
 
         # Perform the initial A* search
         initial_goal_node = self.a_star_fwd()
@@ -130,7 +131,7 @@ class aStar:
 
         adaptive_searches.append(initial_goal_node)
         last_path_length = initial_goal_node.get_g()  # Store the length/cost of the initial path
-
+        self.adaptive = True
         # Update heuristic values based on the first search
         self.update_heuristics(initial_goal_node)
 
