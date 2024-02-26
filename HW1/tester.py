@@ -6,7 +6,6 @@ from a_star import aStar
 from path_visualizer import visualize_path, visualize_path_adaptive
 
 
-
 def extract_path(goal_node):
     path = []
     current = goal_node
@@ -34,6 +33,7 @@ def get_valid_positions(maze):
     valid_positions = [(x, y) for y, row in enumerate(maze) for x, cell in enumerate(row) if cell]
     return valid_positions
 
+
 def read_maze_from_file(file_path):
     maze = []
     expected_row_length = 101  # per assignment instructions
@@ -55,13 +55,16 @@ def choose_random_positions(maze):
         goal = random.choice(valid_positions)
     return start, goal
 
+
 def generate_mazes():
     print("Generating 50 mazes...")
     generate_and_save_mazes(50, 101, 101, 'HW1/mazes')
 
+
 def display_one_maze(file_path):
     print(f"Displaying {file_path}...")
     display_maze(file_path)
+
 
 def view_mazes():
     print("Viewing all 50 mazes...")
@@ -81,11 +84,12 @@ def get_maze_file():
             print("Invalid input. Please enter a number.")
 
 
+
 def run_a_star_forward(maze_file, break_tie_small=True):
     print(f"Running A* Forward on {maze_file} with {'smaller' if break_tie_small else 'larger'} g-value preference...")
     maze = read_maze_from_file(maze_file)
-    start, goal = choose_random_positions(maze)
-    #print(f"Selected Start: {start}, Goal: {goal}")  # Debug 
+    start, goal = choose_random_positions(maze) # the seed should work on this
+    print(f"Selected Start: {start}, Goal: {goal}")  # Debug 
 
     a_star_solver = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=break_tie_small)
     path = a_star_solver.a_star_fwd()
@@ -100,7 +104,7 @@ def run_a_star_forward(maze_file, break_tie_small=True):
 def run_a_star_backward(maze_file):
     print(f"Running A* backward on {maze_file}...")
     maze = read_maze_from_file(maze_file)  # Read the maze
-    start, goal = choose_random_positions(maze)  # Choose start and goal positions
+    start, goal = choose_random_positions(maze)  # the seed should work on this
     print(f"Selected Start: {start}, Goal: {goal}")  # Debug print
 
    
@@ -117,16 +121,19 @@ def run_a_star_backward(maze_file):
     else:
         print("No path found.")
 
+
+
 def run_a_star_adaptive(maze_file):
     print(f"Running A* adaptive on {maze_file}...")
     maze = read_maze_from_file(maze_file)
     start, goal = choose_random_positions(maze)
+    print(f"Selected Start: {start}, Goal: {goal}")  # Debug print
 
     a_star_solver = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=False)
     adaptive_searches = a_star_solver.a_star_adaptive()
 
     if adaptive_searches:
-        extracted_paths = extract_paths(adaptive_searches)  # Assume this correctly handles a list of goal nodes
+        extracted_paths = extract_paths(adaptive_searches)  
         for i, path in enumerate(extracted_paths):
             start_pos = (start[0], start[1])
             goal_pos = (goal[0], goal[1])
@@ -137,77 +144,90 @@ def run_a_star_adaptive(maze_file):
         print("No path found.")
 
 
-def compare_a_star_forward_preferences():
-    output_lines = ["expanded cell count:\n", "Maze #   | A* Forward (Large) | A* Forward (Small)\n"]
+
+def compare_a_star_g_values():
+    output_lines = ["Expanded cell count:\n", "Maze #   | A* Forward (Large G) | A* Forward (Small G)\n"]
     for maze_num in range(50):
         maze_file = f"HW1/mazes/maze{maze_num}.txt"
         maze = read_maze_from_file(maze_file)
-        
-        # Run with small g-value preference
-        random.seed(42)
-        start, goal = choose_random_positions(maze)
-        a_star_small = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=True)
-        _ = a_star_small.a_star_fwd()
-        expanded_small = a_star_small.expanded
 
-        # Run with large g-value preference
-        random.seed(42)
-        a_star_large = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=False)
-        _ = a_star_large.a_star_fwd()
-        expanded_large = a_star_large.expanded
+        start, goal = choose_random_positions(maze)  # the seed should work on this
 
-        output_lines.append(f"maze{maze_num:2} : {expanded_large:15}      | {expanded_small:15}\n")
+        # Initialize the A* solver with break_tie_small=False for large g-value preference
+        a_star_large_g = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=False)
+        path_large_g = a_star_large_g.a_star_fwd()
+        expanded_large = len(a_star_large_g.visited)
 
-    with open("a_star_forward_comparison.txt", "w") as file:
+        # Initialize the A* solver with break_tie_small=True for small g-value preference
+        a_star_small_g = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=True)
+        path_small_g = a_star_small_g.a_star_fwd()
+        expanded_small = len(a_star_small_g.visited)
+
+        output_lines.append(f"Maze {maze_num:2} : {expanded_large:15}       | {expanded_small:15}\n")
+
+    # Write the comparison results to a file
+    with open("a_star_comparison_results.txt", "w") as file:
         file.writelines(output_lines)
+    print("Comparison completed and results saved to a_star_comparison_results.txt.")
+
+
 
 def compare_a_star_forward_backward():
-    output_lines = ["expanded cell count:\n", "Maze #   | A* Forward (Large) | A* Backward (Large)\n"]
+    output_lines = ["Expanded cell count:\n", "Maze #   | A* Forward (Large G) | A* Backward (Large G)\n"]
     for maze_num in range(50):
         maze_file = f"HW1/mazes/maze{maze_num}.txt"
         maze = read_maze_from_file(maze_file)
-        
-        # Run A* Forward with large g-value preference
-        start, goal = choose_random_positions(maze)
-        a_star_fwd_large = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=False)
-        _ = a_star_fwd_large.a_star_fwd()
-        expanded_fwd_large = a_star_fwd_large.expanded
 
-        # Run A* Backward with large g-value preference
-        a_star_bwd_large = aStar(path=maze, start_x=goal[0], start_y=goal[1], goal_x=start[0], goal_y=start[1], break_tie_small=False)
-        _ = a_star_bwd_large.a_star_bkw()
-        expanded_bwd_large = a_star_bwd_large.expanded
+        start, goal = choose_random_positions(maze)  # Ensure consistent start and goal for both runs
 
-        output_lines.append(f"maze{maze_num:2} : {expanded_fwd_large:15}      | {expanded_bwd_large:15}\n")
+        # A* Forward with large g-value preference
+        a_star_fwd_large_g = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=False)
+        a_star_fwd_large_g.a_star_fwd()
+        expanded_fwd_large = len(a_star_fwd_large_g.visited)
 
-    with open("a_star_forward_backward_comparison.txt", "w") as file:
+        # A* Backward (large g-value preference)
+        a_star_bkw = aStar(path=maze, start_x=goal[0], start_y=goal[1], goal_x=start[0], goal_y=start[1], break_tie_small=False) # Note: Start and goal are swapped
+        a_star_bkw.a_star_bkw()
+        expanded_bkw = len(a_star_bkw.visited)
+
+        output_lines.append(f"Maze {maze_num:2} : {expanded_fwd_large:15}       | {expanded_bkw:15}\n")
+
+    # Write the comparison results to a file
+    with open("a_star_fwd_bkw_comparison_results.txt", "w") as file:
         file.writelines(output_lines)
+    print("Comparison of A* Forward (Large G) and A* Backward completed and results saved to a_star_fwd_bkw_comparison_results.txt.")
 
-    
+
+
 def compare_a_star_forward_adaptive():
-    output_lines = ["expanded cell count:\n", "Maze #   | A* Forward (Large) | A* Adaptive (Large)\n"]
+    output_lines = ["Expanded cell count:\n", "Maze #   | A* Forward (Large G) | A* Adaptive (Large G)\n"]
     for maze_num in range(50):
-        random.seed(42)
         maze_file = f"HW1/mazes/maze{maze_num}.txt"
         maze = read_maze_from_file(maze_file)
         
-        # Run A* Forward with large g-value preference
-        start, goal = choose_random_positions(maze)
-        a_star_fwd_large = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=False)
-        _ = a_star_fwd_large.a_star_fwd()
-        expanded_fwd_large = a_star_fwd_large.expanded
+        start, goal = choose_random_positions(maze)  # Ensure consistent start and goal for both runs
 
-        # Run A* Adaptive
+        # A* Forward with large g-value preference
+        a_star_fwd_large_g = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=False)
+        a_star_fwd_large_g.a_star_fwd()
+        expanded_fwd_large = len(a_star_fwd_large_g.visited)
+
+        # Adaptive A*
         a_star_adaptive = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=False)
         adaptive_searches = a_star_adaptive.a_star_adaptive()
-        expanded_adaptive = sum(len(search.expanded) for search in adaptive_searches)
+        
+        # Assuming adaptive_searches returns a list of goal nodes, and the total visited count is desired
+        # Directly use the visited count of the last adaptive search for comparison
+        # This assumes the aStar object retains its state and visited count after the last adaptive search
+        if adaptive_searches:  # Check if any adaptive searches were successful
+            expanded_adaptive = len(a_star_adaptive.visited)  # Use the visited count from the last search
 
-        output_lines.append(f"maze{maze_num:2} : {expanded_fwd_large:15}      | {expanded_adaptive:15}\n")
+        output_lines.append(f"Maze {maze_num:2} : {expanded_fwd_large:15}       | {expanded_adaptive:15}\n")
 
-    with open("a_star_forward_adaptive_comparison.txt", "w") as file:
+    # Write the comparison results to a file
+    with open("a_star_fwd_adaptive_comparison_results.txt", "w") as file:
         file.writelines(output_lines)
-
-
+    print("Comparison of A* Forward (Large G) and A* Adaptive completed and results saved to a_star_fwd_adaptive_comparison_results.txt.")
 
 
 
@@ -235,7 +255,6 @@ def main():
             random.seed(42)
             maze_file = get_maze_file()  
             maze_file_path = f"HW1/mazes/{maze_file}"  
-
 
         if option == "1":
             generate_mazes()
@@ -265,7 +284,7 @@ def main():
             visualize_path(maze, [start, goal], start, goal, set(), maze_file_path, "Maze with points no search")
 
         elif option == "9":
-            compare_a_star_forward_preferences()
+            compare_a_star_g_values()
 
         elif option == "10":
             compare_a_star_forward_backward()

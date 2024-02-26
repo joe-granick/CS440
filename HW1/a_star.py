@@ -47,82 +47,133 @@ class aStar:
         current.update_prev(prev)
         return current
     
+
     def a_star_fwd(self):
         """
-        Repeats A* from start to goal until the shortest path to goal is reached
+        Performs A* search from start to goal, aiming for the shortest path.
         """
-        start = self.a_star(s_node.sNode(self.start_x, self.start_y), self.goal_x, self.goal_y, 0)
-        self.visited[(self.start_x, self.start_y)] = 0
-        if not self.adaptive: 
-            self.visited[(self.goal_x, self.goal_y)] = float('inf')
-        q.heappush(self.frontier, start)
-        goal = None
+        start_node = s_node.sNode(self.start_x, self.start_y, None, self.break_tie_small)
+        start_node.update_g(0)  # Start node g-value is 0
+        start_node.set_h(self.manhattan_dist(self.start_x, self.start_y, self.goal_x, self.goal_y))  # Set initial heuristic
+
+        self.frontier = []
+        q.heappush(self.frontier, start_node)
+        self.visited = {}  # Reset or initialize visited dict
+        self.visited[(self.start_x, self.start_y)] = start_node.get_f()
+
+        goal_node = None
 
         while self.frontier:
-            current = q.heappop(self.frontier)
-            self.expanded += 1
-            if current.get_coord() == (self.goal_x, self.goal_y):
-                goal = current
-                break
-            successors = self.generate_succ(current)
-            new_cost = self.visited[current.get_coord()] + 1
-            for succ in successors:
-                if succ.get_coord() not in self.visited or new_cost < self.visited[succ.get_coord()]:
-                    q.heappush(self.frontier, succ)
-                    succ.update_g(new_cost)
-                    self.visited[succ.get_coord()] = new_cost
+            current_node = q.heappop(self.frontier)
             
-        if goal:
+            # If goal is found, break from the loop
+            if (current_node.get_x(), current_node.get_y()) == (self.goal_x, self.goal_y):
+                goal_node = current_node
+                break
+
+            successors = self.generate_succ(current_node)
+            for succ in successors:
+                new_g = current_node.get_g() + 1  # Assuming each step cost is 1
+                new_f = new_g + succ.get_h()  # f = g + h
+
+                if (succ.get_x(), succ.get_y()) not in self.visited or new_f < self.visited[(succ.get_x(), succ.get_y())]:
+                    succ.update_g(new_g)
+                    succ.set_h(self.manhattan_dist(succ.get_x(), succ.get_y(), self.goal_x, self.goal_y))
+                    self.visited[(succ.get_x(), succ.get_y())] = new_f
+                    q.heappush(self.frontier, succ)
+
+        if goal_node:
             print("Goal found")
-            return goal
-        
-        print("No path to the goal")
-        return None
+            return goal_node
+        else:
+            print("No path to the goal")
+            return None
+
     
     def a_star_bkw(self):
         """
-        Repeats A* from goal to start until the shortest path to goal is reached
+        Performs A* search from goal to start, aiming for the shortest path.
         """
-        goal = self.a_star(s_node.sNode(self.goal_x, self.goal_y), self.start_x, self.start_y, 0)
-        self.visited[(self.goal_x, self.goal_y)] = 0
-        if not self.adaptive: 
-            self.visited[(self.start_x, self.start_y)] = float('inf')
-        q.heappush(self.frontier, goal)
-        start = None
+        # Initialize the goal node as the start for backward search
+        start_node = s_node.sNode(self.goal_x, self.goal_y, None, self.break_tie_small)
+        start_node.update_g(0)  # Goal node g-value is 0 for backward search
+        start_node.set_h(self.manhattan_dist(self.goal_x, self.goal_y, self.start_x, self.start_y))  # Set initial heuristic towards the original start
+
+        self.frontier = []
+        q.heappush(self.frontier, start_node)
+        self.visited = {} 
+        self.visited[(self.goal_x, self.goal_y)] = start_node.get_f()
+
+        original_start_node = None
 
         while self.frontier:
-            current = q.heappop(self.frontier)
-            self.expanded += 1
-            if current.get_coord() == (self.start_x, self.start_y):
-                start = current
+            current_node = q.heappop(self.frontier)
+
+            # If original start is found, break from the loop
+            if (current_node.get_x(), current_node.get_y()) == (self.start_x, self.start_y):
+                original_start_node = current_node
                 break
-            successors = self.generate_succ(current)
-            new_cost = self.visited[current.get_coord()] + 1
+
+            successors = self.generate_succ(current_node)
             for succ in successors:
-                if succ.get_coord() not in self.visited or new_cost < self.visited[succ.get_coord()]:
+                new_g = current_node.get_g() + 1  # each step cost is 1
+                new_f = new_g + succ.get_h()  # f = g + h
+
+                if (succ.get_x(), succ.get_y()) not in self.visited or new_f < self.visited[(succ.get_x(), succ.get_y())]:
+                    succ.update_g(new_g)
+                    # Heuristic now points towards the original start
+                    succ.set_h(self.manhattan_dist(succ.get_x(), succ.get_y(), self.start_x, self.start_y))
+                    self.visited[(succ.get_x(), succ.get_y())] = new_f
                     q.heappush(self.frontier, succ)
-                    succ.update_g(new_cost)
-                    self.visited[succ.get_coord()] = new_cost
-            
-        if start:
-            print("Start found")
-            return start
-        
-        print("No path to the start")
-        return None
+
+        if original_start_node:
+            print("Original start found via backward search")
+            return original_start_node
+        else:
+            print("No path to the original start")
+            return None
     
     def a_star_adaptive(self):
         """
-        Runs A* search adaptively
+        Runs A* search adaptively, updating heuristics based on previous searches.
         """
         adaptive_searches = []
-        a_star = self.a_star_fwd()
-        self.adaptive = True
-        while a_star:
-            adaptive_searches.append(a_star)
-            a_star = self.reverse_path(a_star)
+        self.adaptive = True  # Enable adaptive mode for heuristic updates
+
+        # Perform the initial A* search
+        initial_goal_node = self.a_star_fwd()
+        if not initial_goal_node:
+            print("No path found in the initial search.")
+            return adaptive_searches
+
+        adaptive_searches.append(initial_goal_node)
+        last_path_length = initial_goal_node.get_g()  # Store the length/cost of the initial path
+
+        # Update heuristic values based on the first search
+        self.update_heuristics(initial_goal_node)
+
+        while True:
             a_star = self.a_star_fwd()
+            if a_star and a_star.get_g() != last_path_length:
+                adaptive_searches.append(a_star)
+                self.update_heuristics(a_star)
+                last_path_length = a_star.get_g()  # Update for the next iteration's comparison
+            else:
+                break  # Exit if no new path is found or if the path length hasn't changed
+
         return adaptive_searches
+
+    
+    def update_heuristics(self, goal_node):
+        """
+        Updates the heuristic values (h) of nodes based on the most recent search.
+        """
+        current = goal_node
+        goal_g_value = goal_node.get_g()  # The total cost from start to goal found in the most recent search
+
+        while current:
+            self.visited[current.get_coord()] = goal_g_value - current.get_g()
+            current = current.get_prev()
     
     def reverse_path(self, node):
         """
