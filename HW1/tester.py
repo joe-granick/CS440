@@ -147,6 +147,10 @@ def run_a_star_adaptive(maze_file):
 
 def compare_a_star_g_values():
     output_lines = ["Expanded cell count:\n", "Maze #   | A* Forward (Large G) | A* Forward (Small G)\n"]
+
+    total_expanded_large = 0
+    total_expanded_small = 0
+
     for maze_num in range(50):
         maze_file = f"HW1/mazes/maze{maze_num}.txt"
         maze = read_maze_from_file(maze_file)
@@ -157,13 +161,24 @@ def compare_a_star_g_values():
         a_star_large_g = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=False)
         path_large_g = a_star_large_g.a_star_fwd()
         expanded_large = len(a_star_large_g.visited)
+        total_expanded_large += expanded_large
 
         # Initialize the A* solver with break_tie_small=True for small g-value preference
         a_star_small_g = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=True)
         path_small_g = a_star_small_g.a_star_fwd()
         expanded_small = len(a_star_small_g.visited)
+        total_expanded_small += expanded_small
 
         output_lines.append(f"Maze {maze_num:2} : {expanded_large:15}       | {expanded_small:15}\n")
+
+    avg_expanded_large = total_expanded_large / 50
+    avg_expanded_small = total_expanded_small / 50
+
+    output_lines.append(f"\nTotal expanded nodes: {total_expanded_large:15} | {total_expanded_small:15}\n")
+    output_lines.append(f"Average expanded nodes: {avg_expanded_large:15} | {avg_expanded_small:15}\n")
+
+
+
 
     # Write the comparison results to a file
     with open("a_star_comparison_results.txt", "w") as file:
@@ -174,6 +189,10 @@ def compare_a_star_g_values():
 
 def compare_a_star_forward_backward():
     output_lines = ["Expanded cell count:\n", "Maze #   | A* Forward (Large G) | A* Backward (Large G)\n"]
+
+    total_expanded_fwd = 0
+    total_expanded_bkw = 0
+
     for maze_num in range(50):
         maze_file = f"HW1/mazes/maze{maze_num}.txt"
         maze = read_maze_from_file(maze_file)
@@ -184,13 +203,21 @@ def compare_a_star_forward_backward():
         a_star_fwd_large_g = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=False)
         a_star_fwd_large_g.a_star_fwd()
         expanded_fwd_large = len(a_star_fwd_large_g.visited)
+        total_expanded_fwd += expanded_fwd_large
 
         # A* Backward (large g-value preference)
         a_star_bkw = aStar(path=maze, start_x=goal[0], start_y=goal[1], goal_x=start[0], goal_y=start[1], break_tie_small=False) # Note: Start and goal are swapped
         a_star_bkw.a_star_bkw()
         expanded_bkw = len(a_star_bkw.visited)
+        total_expanded_bkw += expanded_bkw
 
         output_lines.append(f"Maze {maze_num:2} : {expanded_fwd_large:15}       | {expanded_bkw:15}\n")
+
+    avg_expanded_fwd = total_expanded_fwd / 50
+    avg_expanded_bkw = total_expanded_bkw / 50
+
+    output_lines.append(f"\nTotal expanded nodes: {total_expanded_fwd:15} | {total_expanded_bkw:15}\n")
+    output_lines.append(f"Average expanded nodes: {avg_expanded_fwd:15} | {avg_expanded_bkw:15}\n")
 
     # Write the comparison results to a file
     with open("a_star_fwd_bkw_comparison_results.txt", "w") as file:
@@ -201,6 +228,10 @@ def compare_a_star_forward_backward():
 
 def compare_a_star_forward_adaptive():
     output_lines = ["Expanded cell count:\n", "Maze #   | A* Forward (Large G) | A* Adaptive (Large G)\n"]
+
+    total_expanded_fwd = 0
+    total_expanded_adaptive = 0
+
     for maze_num in range(50):
         maze_file = f"HW1/mazes/maze{maze_num}.txt"
         maze = read_maze_from_file(maze_file)
@@ -211,6 +242,7 @@ def compare_a_star_forward_adaptive():
         a_star_fwd_large_g = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=False)
         a_star_fwd_large_g.a_star_fwd()
         expanded_fwd_large = len(a_star_fwd_large_g.visited)
+        total_expanded_fwd += expanded_fwd_large
 
         # Adaptive A*
         a_star_adaptive = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=False)
@@ -221,8 +253,15 @@ def compare_a_star_forward_adaptive():
         # This assumes the aStar object retains its state and visited count after the last adaptive search
         if adaptive_searches:  # Check if any adaptive searches were successful
             expanded_adaptive = len(a_star_adaptive.visited)  # Use the visited count from the last search
+            total_expanded_adaptive += expanded_adaptive
 
         output_lines.append(f"Maze {maze_num:2} : {expanded_fwd_large:15}       | {expanded_adaptive:15}\n")
+
+    avg_expanded_fwd = total_expanded_fwd / 50
+    avg_expanded_adaptive = total_expanded_adaptive / 50
+
+    output_lines.append(f"\nTotal expanded nodes: {total_expanded_fwd:15} | {total_expanded_adaptive:15}\n")
+    output_lines.append(f"Average expanded nodes: {avg_expanded_fwd:15} | {avg_expanded_adaptive:15}\n")
 
     # Write the comparison results to a file
     with open("a_star_fwd_adaptive_comparison_results.txt", "w") as file:
@@ -265,10 +304,10 @@ def main():
         elif option == "3":
             view_mazes()
         
-        elif option == "4" and maze_file_path: #smallest gvalue
+        elif option == "4" and maze_file_path: #small gvalue
             run_a_star_forward(maze_file_path, break_tie_small=True)
 
-        elif option == "5" and maze_file_path: #largest gvalue
+        elif option == "5" and maze_file_path: #large gvalue
             run_a_star_forward(maze_file_path, break_tie_small=False)
 
         elif option == "6" and maze_file_path:
