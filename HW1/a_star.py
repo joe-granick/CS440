@@ -48,38 +48,38 @@ class aStar:
         return current
     
     def a_star_search(self, goal):
-        goal_node = s_node.sNode(goal.get_x(), goal.get_y(), None, self.break_tie_small)
-        goal_node.update_g(float('inf'))  # Ensure goal node starts with infinite g-value
-        self.visited[goal.get_coord()] = float('inf')  # Reflect this in visited as well
 
-        q.heappush(self.frontier, goal_node)  # Add goal node to the frontier for consistency
+        goal_node = None
+
+        # Initialize the goal in visited if not adaptive or correct logic accordingly
+        if not self.adaptive:
+            self.visited[goal.get_coord()] = goal.get_g()
 
         while self.frontier:
             current_node = q.heappop(self.frontier)
-            
-            # Skip processing if node's g-value is outdated
-            if current_node.get_coord() in self.visited and current_node.get_g() > self.visited[current_node.get_coord()]:
-                continue
-
-            # If goal is found, return it
             if current_node.get_coord() == goal.get_coord():
-                print("Goal found")
-                return current_node
+                goal_node = current_node
+                break
+
 
             print(self.expanded, " nodes expanded: ", current_node.get_coord(), " g: ", current_node.get_g(), " f: ", current_node.get_f())
-            successors = self.generate_succ(current_node)
             self.expanded += 1
+            successors = self.generate_succ(current_node)
 
             for succ in successors:
-                new_g = current_node.get_g() + 1  # each step cost is 1
+                new_g = current_node.get_g() + 1  # Assuming each step cost is 1
                 if succ.get_coord() not in self.visited or new_g < self.visited[succ.get_coord()]:
                     succ.update_g(new_g)
                     succ.set_h(self.manhattan_dist(succ.get_x(), succ.get_y(), goal.get_x(), goal.get_y()))
-                    self.visited[succ.get_coord()] = new_g
                     q.heappush(self.frontier, succ)
+                    self.visited[succ.get_coord()] = new_g
 
-        print("No path to the goal")
-        return None
+        if goal_node:
+            print("Goal found")
+            return goal_node
+        else:
+            print("No path to the goal")
+            return None
 
 
     def a_star_fwd(self):
