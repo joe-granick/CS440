@@ -48,34 +48,39 @@ class aStar:
         return current
     
     def a_star_search(self, goal):
-        if not self.adaptive:
-            self.visited[goal.get_coord()] = goal.get_g()
-            goal_node = None
-        while self.frontier and self.frontier[0].get_g()<self.visited[goal.get_coord()]:
+        goal_node = s_node.sNode(goal.get_x(), goal.get_y(), None, self.break_tie_small)
+        goal_node.update_g(float('inf'))  # Ensure goal node starts with infinite g-value
+        self.visited[goal.get_coord()] = float('inf')  # Reflect this in visited as well
+
+        q.heappush(self.frontier, goal_node)  # Add goal node to the frontier for consistency
+
+        while self.frontier:
             current_node = q.heappop(self.frontier)
             
-            # If goal is found, break from the loop
+            # Skip processing if node's g-value is outdated
+            if current_node.get_coord() in self.visited and current_node.get_g() > self.visited[current_node.get_coord()]:
+                continue
+
+            # If goal is found, return it
             if current_node.get_coord() == goal.get_coord():
-                goal_node = current_node
-                break
-            
-            print(self. expanded, " nodes expanded: ", current_node.get_coord()," g: ", current_node.get_g(), " f: ", current_node.get_f())
+                print("Goal found")
+                return current_node
+
+            print(self.expanded, " nodes expanded: ", current_node.get_coord(), " g: ", current_node.get_g(), " f: ", current_node.get_f())
             successors = self.generate_succ(current_node)
-            self.expanded+=1
+            self.expanded += 1
+
             for succ in successors:
-                new_g = current_node.get_g() + 1  # Assuming each step cost is 1
-                if succ.get_coord() not in self.visited or new_g < self.visited[(succ.get_x(), succ.get_y())]:
+                new_g = current_node.get_g() + 1  # each step cost is 1
+                if succ.get_coord() not in self.visited or new_g < self.visited[succ.get_coord()]:
                     succ.update_g(new_g)
                     succ.set_h(self.manhattan_dist(succ.get_x(), succ.get_y(), goal.get_x(), goal.get_y()))
                     self.visited[succ.get_coord()] = new_g
                     q.heappush(self.frontier, succ)
 
-        if goal_node:
-            print("Goal found")
-            return goal_node
-        else:
-            print("No path to the goal")
-            return None
+        print("No path to the goal")
+        return None
+
 
     def a_star_fwd(self):
         """
@@ -116,10 +121,47 @@ class aStar:
         goal = self.a_star_search(goal=goal_node)
         return goal
     
+
     def a_star_adaptive(self):
         """
         Runs A* search adaptively, updating heuristics based on previous searches.
         """
+        adaptive_searches = []
+        self.adaptive = True
+
+        # Perform the initial A* search
+        initial_goal_node = self.a_star_fwd()
+        if not initial_goal_node:
+            print("No path found in the initial search.")
+            return adaptive_searches
+
+        adaptive_searches.append(initial_goal_node)
+        last_path_length = initial_goal_node.get_g()  # Store the length/cost of the initial path
+        print(f"Initial search completed with path length: {last_path_length}, nodes expanded: {self.expanded}")
+
+        # Update heuristic values based on the first search
+        self.update_heuristics(initial_goal_node)
+
+        while True:
+            self.frontier = []  # Reset the frontier for the next search
+            self.visited = {}  # Optionally reset or keep the visited nodes based on your adaptive strategy
+            a_star = self.a_star_fwd()
+            if a_star and a_star.get_g() != last_path_length:
+                adaptive_searches.append(a_star)
+                print(f"Adaptive search found a new path with length: {a_star.get_g()}, nodes expanded: {self.expanded}")
+                self.update_heuristics(a_star)
+                last_path_length = a_star.get_g()  # Update for the next iteration's comparison
+            else:
+                break  # Exit if no new path is found or if the path length hasn't changed
+
+        return adaptive_searches
+
+
+    """
+    def a_star_adaptive(self):
+        
+        Runs A* search adaptively, updating heuristics based on previous searches.
+        
         adaptive_searches = []
           # Enable adaptive mode for heuristic updates
 
@@ -145,7 +187,7 @@ class aStar:
                 break  # Exit if no new path is found or if the path length hasn't changed
 
         return adaptive_searches
-
+    """
     
     def update_heuristics(self, goal_node):
         """
