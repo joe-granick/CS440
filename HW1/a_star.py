@@ -121,10 +121,47 @@ class aStar:
         goal = self.a_star_search(goal=goal_node)
         return goal
     
+    def a_star_repeated(self):
+        """
+        Runs A* search to maintain optimal path in environments where path costs can change between actions
+        """
+        repeated_searches=[]
+        
+        # Perform the initial A* search
+        initial_goal_node = self.a_star_fwd()
+        if not initial_goal_node:
+            print("No path found in the initial search.")
+            return repeated_searches
+
+        repeated_searches.append(initial_goal_node)
+        last_path_length = initial_goal_node.get_g()  # Store the length/cost of the initial path
+        print(f"Initial search completed with path length: {last_path_length}, nodes expanded: {self.expanded}")
+
+        while True:
+            self.frontier = []  # Reset the frontier for the next search
+            a_star = self.a_star_fwd()
+            if a_star and a_star.get_g() != last_path_length: # If a new path is found
+                repeated_searches.append(a_star) # Store the new path
+                print(f"Adaptive search found a new path with length: {a_star.get_g()}, nodes expanded: {self.expanded}")
+                self.update_heuristics(a_star)
+                last_path_length = a_star.get_g()  # Update for the next iteration's comparison
+            elif a_star:  # If a goal is found but path length remains the same
+                repeated_searches.append(a_star)
+                print("Goal found but no improvement in path length. Exiting adaptive search.")
+                break
+            else:
+                print("No new path found. Exiting adaptive search.")
+                break  # Exit if no new path is found
+
+
+        return repeated_searches
+
 
     def a_star_adaptive(self):
         """
-        Runs A* search adaptively, updating heuristics based on previous searches.
+        Repeats A* search to maintain shortest path like repeated, but after initial shortest path is found
+        it provides a better heuristic for all previosuly visited nodes based on the previos search. This should reduce 
+        number and length of the new optimal path especially in cases where the new shortest path is similiar to the previous  
         """
         adaptive_searches = []
         self.adaptive = True
@@ -145,7 +182,6 @@ class aStar:
         while True:
             self.frontier = []  # Reset the frontier for the next search
             self.visited = defaultdict()  # Optionally reset or keep the visited nodes based on adaptive strategy
-            self.expanded = 0  # Reset the expanded nodes for the next search
             a_star = self.a_star_fwd()
             if a_star and a_star.get_g() != last_path_length: # If a new path is found
                 adaptive_searches.append(a_star) # Store the new path
@@ -159,8 +195,6 @@ class aStar:
             else:
                 print("No new path found. Exiting adaptive search.")
                 break  # Exit if no new path is found
-
-
         return adaptive_searches
 
     
