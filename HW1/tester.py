@@ -93,11 +93,12 @@ def run_a_star_forward(maze_file, break_tie_small=True):
 
     a_star_solver = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=break_tie_small)
     path = a_star_solver.a_star_fwd()
-
-    extracted_path = extract_path(path)
     visited_nodes = set(a_star_solver.visited.keys())
+    extracted_path = extract_path(path)
+    expanded_nodes = a_star_solver.expanded
+
     print("Generating path visualization...")
-    visualize_path(maze, extracted_path, start, goal, visited_nodes, maze_file, f"A* Forward {'smaller' if break_tie_small else 'larger'} g-value preference")
+    visualize_path(maze, extracted_path, start, goal, visited_nodes, expanded_nodes, maze_file, f"A* Forward {'smaller' if break_tie_small else 'larger'} g-value preference")
 
     
 
@@ -116,8 +117,9 @@ def run_a_star_backward(maze_file):
         start_pos = (start[0], start[1])  
         goal_pos = (goal[0], goal[1])  
         visited_nodes = set(a_star_solver.visited.keys())
+        expanded_nodes = a_star_solver.expanded
         print("Generating path visualization...")
-        visualize_path(maze, extracted_path, start_pos, goal_pos, visited_nodes, maze_file, "A* Backward larger g-value preference")
+        visualize_path(maze, extracted_path, start, goal, visited_nodes, expanded_nodes, maze_file, "A* Backward larger g-value preference")
     else:
         print("No path found.")
 
@@ -138,8 +140,9 @@ def run_a_star_adaptive(maze_file):
             start_pos = (start[0], start[1])
             goal_pos = (goal[0], goal[1])
             visited_nodes = set(a_star_solver.visited.keys())
+            expanded_nodes = a_star_solver.expanded
             print(f"Visualizing adaptive search {i+1}...")
-            visualize_path_adaptive(maze, path, start_pos, goal_pos, visited_nodes, maze_file, f"A* Adaptive Search {i+1}", i+1)
+            visualize_path_adaptive(maze, path, start_pos, goal_pos, visited_nodes, expanded_nodes, maze_file, f"A* Adaptive Search {i+1}", i+1)
     else:
         print("No path found.")
 
@@ -160,13 +163,13 @@ def compare_a_star_g_values():
         # Initialize the A* solver with break_tie_small=False for large g-value preference
         a_star_large_g = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=False)
         path_large_g = a_star_large_g.a_star_fwd()
-        expanded_large = len(a_star_large_g.visited)
+        expanded_large = a_star_large_g.expanded
         total_expanded_large += expanded_large
 
         # Initialize the A* solver with break_tie_small=True for small g-value preference
         a_star_small_g = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=True)
         path_small_g = a_star_small_g.a_star_fwd()
-        expanded_small = len(a_star_small_g.visited)
+        expanded_small = a_star_small_g.expanded
         total_expanded_small += expanded_small
 
         output_lines.append(f"Maze {maze_num:2} : {expanded_large:15}       | {expanded_small:15}\n")

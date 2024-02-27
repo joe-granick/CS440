@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Patch
 
-def visualize_path(maze, path, start, goal, visited_nodes, file_name, search_type):
+def visualize_path(maze, path, start, goal, visited_nodes, expanded_nodes, file_name, search_type):
     maze_array = np.array(maze)
     plt.figure(figsize=(10, 10))
     ax = plt.gca()
@@ -48,7 +48,7 @@ def visualize_path(maze, path, start, goal, visited_nodes, file_name, search_typ
     expanded_cells_count = len(visited_nodes)
     
     # Display count of expanded cells
-    plt.figtext(0.5, 0.01, f'Expanded Cells Count: {expanded_cells_count}', ha="center", fontsize=12)
+    plt.figtext(0.5, 0.01, f'Expanded Cells Count: {expanded_nodes}', ha="center", fontsize=12)
 
     # Displaying the title with file name and search type
     title_text = f"{file_name.split('/')[2]} - {search_type}"
@@ -56,7 +56,7 @@ def visualize_path(maze, path, start, goal, visited_nodes, file_name, search_typ
 
     plt.show()
 
-def visualize_path_adaptive(maze, path, start, goal, visited_nodes, file_name, search_type, adaptive_search_num):
+def visualize_path_adaptive(maze, path, start, goal, visited_nodes, expanded_nodes, file_name, search_type, adaptive_search_num):
     maze_array = np.array(maze)
     plt.figure(figsize=(10, 10))
     ax = plt.gca()
@@ -98,11 +98,8 @@ def visualize_path_adaptive(maze, path, start, goal, visited_nodes, file_name, s
     # Adjust subplot to make room for the legend
     plt.subplots_adjust(right=0.85)
     
-    # Count of expanded cells
-    expanded_cells_count = len(visited_nodes)
-    
     # Display count of expanded cells
-    plt.figtext(0.5, 0.01, f'Expanded Cells Count: {expanded_cells_count}', ha="center", fontsize=12)
+    plt.figtext(0.5, 0.01, f'Expanded Cells Count: {expanded_nodes}', ha="center", fontsize=12)
 
     # Displaying the title with file name and search type
     title_text = f"{file_name.split('/')[2]} - {search_type}"
