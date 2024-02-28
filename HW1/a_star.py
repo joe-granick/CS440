@@ -52,9 +52,7 @@ class aStar:
         return current
     
     def a_star_search(self, goal):
-
         goal_node = None
-
         # Initialize the goal in visited if not adaptive or correct logic accordingly
         if not self.adaptive:
             self.visited[goal.get_coord()] = goal.get_g()
@@ -67,7 +65,6 @@ class aStar:
             print(self.expanded, " nodes expanded: ", current_node.get_coord(), " g: ", current_node.get_g(), " f: ", current_node.get_f()," start:", self.start_x, self.start_y, " goal: ", self.goal_x, self.goal_y)
             self.expanded += 1
             successors = self.generate_succ(current_node)
-
             for succ in successors:
                 new_g = current_node.get_g() + 1  # Assuming each step cost is 1
                 if succ.get_coord() not in self.visited or new_g < self.visited[succ.get_coord()]:
@@ -88,7 +85,7 @@ class aStar:
         """
         Performs A* search from start to goal, aiming for the shortest path.
         """
-        self.visited = defaultdict()
+        if not self.adaptive: self.visited = defaultdict()
         self.frontier=[]
         start_node = s_node.sNode(self.start_x, self.start_y, None, self.break_tie_small)
         start_node.update_g(0)  # Start node g-value is 0
@@ -108,7 +105,7 @@ class aStar:
         """
         Performs A* search from goal to start, aiming for the shortest path.
         """
-        self.visited = defaultdict()
+        if not self.adaptive: self.visited = defaultdict()
         self.frontier=[]
         # Initialize the goal node as the start for backward search
         start_node = s_node.sNode(self.goal_x, self.goal_y, None, self.break_tie_small)
@@ -134,6 +131,7 @@ class aStar:
         #self.search_count = defaultdict()
         
         shortest_path = self.a_star_fwd()
+        shortest_paths = []
         
         print(shortest_path.get_coord())
         rev_shortest_path = self.a_star_bkw()
@@ -141,79 +139,108 @@ class aStar:
         self.start_x, self.start_y = rev_shortest_path.get_prev().get_coord()
         
         while (self.start_x, self.start_y)!=(self.goal_x,self.goal_y):
-            
+            self.visited = defaultdict()
             shortest_path = self.a_star_fwd()
+            if not shortest_path:
+                break
             shortest_path_length = shortest_path.get_g()
             rev_shortest_path = self.a_star_bkw()
+            if not rev_shortest_path:
+                break
         
             rev_shortest_path_length = rev_shortest_path.get_g()
             
             if rev_shortest_path_length == shortest_path_length:
                 rev_shortest_path = rev_shortest_path.get_prev()
                 self.start_x, self.start_y = rev_shortest_path.get_coord()
-                if update: 
+                if update:
+                    self.visited = defaultdict() 
                     block_x, block_y=update.pop(random.randint(0,len(update)-1))
                     self.path[block_y][block_x]=False
-            for row in range(len(self.path)):
-                for col in range(len(self.path[row])):
-                    if self.path[row][col]:
-                        print('O', end='')
-                    else:
-                        print('X', end='')
-                print()
-            print()
+                    for row in range(len(self.path)):
+                        for col in range(len(self.path[row])):
+                            if self.path[row][col]:
+                                print('O', end='')
+                            else:
+                                print('X', end='')
+                        print()
+                    print()
+            shortest_paths.append(shortest_paths)
         return shortest_path
 
-    def a_star_adaptive(self):
+
+    def a_star_adaptive(self,update=[]):
         """
         Repeats A* search to maintain shortest path like repeated, but after initial shortest path is found
         it provides a better heuristic for all previosuly visited nodes based on the previos search. This should reduce 
         number and length of the new optimal path especially in cases where the new shortest path is similiar to the previous  
         """
         adaptive_searches = []
+        self.frontier = []  # Reset the frontier for the next search
+          # Reset visited nodes for the next search
+        
+        shortest_path = self.a_star_fwd()  # Forward A* search
+        print("Shortest Path:", shortest_path.get_coord())
+        
+        rev_shortest_path = self.a_star_bkw()  # Backward A* search
+        print("Reversed Shortest Path:", rev_shortest_path.get_coord())
         self.adaptive = True
-
-        # Perform the initial A* search
-        initial_goal_node = self.a_star_fwd()
-        if not initial_goal_node:
-            print("No path found in the initial search.")
-            return adaptive_searches
-
-        adaptive_searches.append(initial_goal_node)
-        last_path_length = initial_goal_node.get_g()  # Store the length/cost of the initial path
-        print(f"Initial search completed with path length: {last_path_length}, nodes expanded: {self.expanded}")
-
-        # Update heuristic values based on the first search
-        self.update_heuristics(initial_goal_node)
-
-        while True:
-            self.frontier = []  # Reset the frontier for the next search
-            self.visited = defaultdict()  # Optionally reset or keep the visited nodes based on adaptive strategy
-            a_star = self.a_star_fwd()
-            if a_star and a_star.get_g() != last_path_length: # If a new path is found
-                adaptive_searches.append(a_star) # Store the new path
-                print(f"Adaptive search found a new path with length: {a_star.get_g()}, nodes expanded: {self.expanded}")
-                self.update_heuristics(a_star)
-                last_path_length = a_star.get_g()  # Update for the next iteration's comparison
-            elif a_star:  # If a goal is found but path length remains the same
-                adaptive_searches.append(a_star)
-                print("Goal found but no improvement in path length. Exiting adaptive search.")
+        # Update starting position for the next iteration
+        self.start_x, self.start_y = rev_shortest_path.get_prev().get_coord()
+        while (self.start_x, self.start_y) != (self.goal_x, self.goal_y):
+            shortest_path = self.a_star_fwd()
+            if not shortest_path:
                 break
-            else:
+            shortest_path_length = shortest_path.get_g()
+            
+            
+
+            rev_shortest_path = self.a_star_bkw()
+            if not rev_shortest_path:
+                break
+            rev_shortest_path_length = rev_shortest_path.get_g()
+            
+            
+            if rev_shortest_path_length == shortest_path_length:
+                rev_shortest_path = rev_shortest_path.get_prev()
+                self.start_x, self.start_y = rev_shortest_path.get_coord()
+                # Update heuristic for adaptive behavior
+                self.update_heuristics(shortest_path, rev_shortest_path)
+                
+                # Simulate changes in the environment
+                if update: 
+                    block_x, block_y = update.pop(random.randint(0, len(update)-1))
+                    self.path[block_y][block_x] = False
+                    for row in range(len(self.path)):
+                        for col in range(len(self.path[row])):
+                            if self.path[row][col]:
+                                print('O', end='')
+                            else:
+                                print('X', end='')
+                        print()
+                    print()
+                    self.visited = defaultdict()
+            adaptive_searches.append(shortest_path)
+            print("Shortest Path Found:", shortest_path.get_coord())
+
+            # Check for termination conditions
+            if shortest_path.get_g() >= self.shortest_path_length:
                 print("No new path found. Exiting adaptive search.")
-                break  # Exit if no new path is found
+                break
+            
+            else:
+                self.shortest_path_length = shortest_path.get_g()
+
         return adaptive_searches
-
     
-    def update_heuristics(self, goal_node):
+    def update_heuristics(self, forward_path, backward_path):
         """
-        Updates the heuristic values (h) of nodes based on the most recent search.
+        Updates the heuristic values (h) for previously visited nodes based on the previous search.
         """
-        current = goal_node
-        goal_g_value = goal_node.get_g()  # The total cost from start to goal found in the most recent search
-
+        current = backward_path
         while current:
-            self.visited[current.get_coord()] = goal_g_value - current.get_g()
+            coord = current.get_coord()
+            self.visited[coord] = forward_path.get_g() - current.get_g()
             current = current.get_prev()
     
     def reverse_path(self, node):
@@ -263,24 +290,11 @@ class aStar:
                 node = node.get_prev()
         print("Expanded nodes: back", bkw_test_maze.get_expanded())
 
-        # adaptive_test_maze = aStar(path=test_path, start_x=start_x, start_y=start_y, goal_x=goal_x, goal_y=goal_y)
-        # adaptive = adaptive_test_maze.a_star_adaptive()
-        # for path in adaptive:
-        #     while path.get_prev():
-        #         print(path.get_prev().get_coord(), ": ", adaptive_test_maze.visited[path.get_prev().get_coord()], end='')
-        #         path = path.get_prev()
-        # print()
-        # print("Expanded nodes: ", adaptive_test_maze.get_expanded())
+    
 
         repeated_test=[[True for x in range(len(test_path))] for y in range(len(test_path[0]))]
         blocked_cells=[]
-        # basic repeated and adpative tests
-        """""
-        for i in range(len(test_path)-1):
-            for j in range(len(test_path[i])-1):
-                blocked_cells.append(j,i)
-        """""
-        
+     
         repeated_test[4][3]=False
         repeated_test[3][2]=False
         
@@ -292,9 +306,13 @@ class aStar:
         repeated_test_maze = aStar(path=repeated_test, start_x=start_x, start_y=start_y, goal_x=goal_x, goal_y=goal_y)
         repeated_test_maze.a_star_repeated(blocked_cells)
         
-        
-
-
-        
+        adaptive_test_maze = aStar(path=repeated_test, start_x=start_x, start_y=start_y, goal_x=goal_x, goal_y=goal_y)
+        adaptive_maze=adaptive_test_maze.a_star_adaptive(blocked_cells)
+        for path in adaptive_maze:
+            while path.get_prev():
+                print(path.get_prev().get_coord(), ": ", path.get_prev().get_g(), end='')
+                path = path.get_prev()
+        print()
+        print("Expanded nodes: ", adaptive_test_maze.get_expanded())        
 if __name__ == "__main__":
     aStar().main()
