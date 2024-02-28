@@ -45,6 +45,14 @@ def read_maze_from_file(file_path):
             maze.append([True if char == 'O' else False for char in stripped_line])
     return maze
 
+def list_of_blocked_cells(maze):
+    list_of = []
+    for i in range(len(maze)):
+        for j in range(len(maze[0])):
+            if maze[i][j] == False:
+                list_of.append((i,j))
+    return list_of
+
 
 def choose_random_positions(maze):
     random.seed(42)
@@ -92,6 +100,7 @@ def run_a_star_forward(maze_file, break_tie_small=True):
     print(f"Selected Start: {start}, Goal: {goal}")  # Debug 
 
     a_star_solver = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=break_tie_small)
+    list_of_blocked = list_of_blocked_cells(maze)
     path = a_star_solver.a_star_fwd()
     visited_nodes = set(a_star_solver.visited.keys())
     extracted_path = extract_path(path)
