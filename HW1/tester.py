@@ -109,7 +109,26 @@ def run_a_star_forward(maze_file, break_tie_small=True):
     print("Generating path visualization...")
     visualize_path(maze, extracted_path, start, goal, visited_nodes, expanded_nodes, maze_file, f"A* Forward {'smaller' if break_tie_small else 'larger'} g-value preference")
 
-    
+def run_a_star_repeat(maze_file, break_tie_small=True):
+    print(f"Running A* Repeated on {maze_file} with {'smaller' if break_tie_small else 'larger'} g-value preference...")
+    maze = read_maze_from_file(maze_file)
+    start, goal = choose_random_positions(maze) # the seed should work on this
+    print(f"Selected Start: {start}, Goal: {goal}")  # Debug 
+
+    for r in maze:
+        for c in maze[r]:
+            maze[r][c] = True
+    a_star_solver = aStar(path=maze, start_x=start[0], start_y=start[1], goal_x=goal[0], goal_y=goal[1], break_tie_small=break_tie_small)
+    list_of_blocked = list_of_blocked_cells(maze)
+    path = a_star_solver.a_star_repeated(list_of_blocked)
+    visited_nodes = set(a_star_solver.visited.keys())
+    extracted_path = extract_path(path)
+    expanded_nodes = a_star_solver.expanded
+
+    print("Generating path visualization...")
+    visualize_path(maze, extracted_path, start, goal, visited_nodes, expanded_nodes, maze_file, f"A* Repeated {'smaller' if break_tie_small else 'larger'} g-value preference")
+
+
 
 def run_a_star_backward(maze_file):
     print(f"Running A* backward on {maze_file}...")
@@ -296,13 +315,14 @@ def main():
         print("8 - Maze with start/goal points (no search)")
         print("9 - Compare A* Forward by g-value")
         print("10 - Compare A* Forward/Backward by large g-value")
-        print("11 - Compare A* Forward/Adaptive by large g-value")
-        print("12 - Exit")
+        print("11 - Run repeated A*")
+        print("12 - Compare A* Forward/Adaptive by large g-value")
+        print("13 - Exit")
 
         option = input("Enter your choice: ")
         maze_file_path = None  
 
-        if option in ["2", "4", "5", "6", "7", "8"]:
+        if option in ["2", "4", "5", "6", "7", "8", "11"]:
             random.seed(42)
             maze_file = get_maze_file()  
             maze_file_path = f"HW1/mazes/{maze_file}"  
@@ -341,9 +361,12 @@ def main():
             compare_a_star_forward_backward()
 
         elif option == "11":
+            run_a_star_repeat(maze_file)
+        
+        elif option == "12":
             compare_a_star_forward_adaptive()
 
-        elif option == "12":
+        elif option == "13":
             print("Exiting program.")
             break
 
