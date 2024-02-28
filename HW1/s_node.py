@@ -26,7 +26,7 @@ class sNode:
         return self.prev
     
     def get_coord(self):
-        return(self.x, self.y)
+        return (self.x, self.y)
     def get_x(self):
         return self.x
     def get_y(self):
@@ -70,6 +70,7 @@ class sNode:
     Defines rank of node based on state values for use by priority queue representing
     exploratory frontier of succesors nodes to explore 
     """
+
     def __lt__(self,other):
         if (self.g + self.h) == (other.g + other.h):
             if self.g == other.g:
