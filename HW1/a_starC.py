@@ -1,5 +1,5 @@
 #from Queue import PriorityQueue, PrioritizedItem
-import queue as q
+from pq import PriorityQueue as q
 from collections import defaultdict 
 import grid_world
 import random
