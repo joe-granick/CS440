@@ -11,8 +11,7 @@ def extract_path(goal_node):
     current = goal_node
     while current is not None:
         path.append((current.x, current.y))  
-        current = current.prev  
-    path.reverse()  # Reverse the path so it goes from start to goal (or goal to start)
+        current = current.prev
     return path
 
 

@@ -16,7 +16,8 @@ class sNode:
         """
         """
         self.x,self.y=x,y
-        self.g,self.h = float('inf'),0
+        self.g = float('inf')
+        self.h =0
         self.prev = prev
         self.break_tie_small = break_tie
      
@@ -73,8 +74,8 @@ class sNode:
 
     def __lt__(self,other):
         if (self.g + self.h) == (other.g + other.h):
-            if self.g == other.g:
-                return (random.random() <0.5)
+            #if self.g == other.g:
+            #    return (random.random() <0.5)
             if self.break_tie_small:
                 return (self.g) < (other.g)
             return (self.g) > (other.g)    
