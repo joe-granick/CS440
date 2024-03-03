@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "name": "Python: A_Star",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}
