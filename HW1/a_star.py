@@ -121,14 +121,14 @@ class aStar:
             goal = self.a_star_search(start)
             current_path = self.reverse_path(goal)
             
-            for node in current_path:
-                print(node.get_coord())
-            print()
+            #for node in current_path:
+            #    print(node.get_coord())
+            #print()
             
             self.search_trajectory.append(current_path) 
             start = self.traverse_path(current_path)
             
-            print(start.get_coord())
+            #print(start.get_coord())
             print()
             start.update_prev(None)
             self.frontier=[]
@@ -139,7 +139,7 @@ class aStar:
             if not self.path[node.get_y()][node.get_x()]:
                 self.blocked.add(node.get_coord())
                 self.blocked_list.append(node.get_coord())
-                print(node.get_coord(), " blocked")
+                #print(node.get_coord(), " blocked")
                 
                 self.search_paths.append(self.reverse_path(node.get_prev()))
                 
@@ -201,20 +201,30 @@ class aStar:
         Draw the path on the Pygame screen
         """
         for node in path:
-            print(node.get_coord())
+            #print(node.get_coord())
             rect = pygame.Rect(node.get_x() * 30, node.get_y() * 30, 30, 30)
             pygame.draw.rect(self.screen, color, rect)
-        print()
+        #print()
     
+    def draw_full_path(self, paths, color):
+        """
+        Draw the path on the Pygame screen
+        """
+        for path in paths:
+            for node in path:
+            #print(node.get_coord())
+                rect = pygame.Rect(node.get_x() * 30, node.get_y() * 30, 30, 30)
+                pygame.draw.rect(self.screen, color, rect)
+
     def draw_blocked(self, path, color,index):
         """
         Draw the path on the Pygame screen
         """
         for node in range(index):
-            print(node)
+            #print(node)
             rect = pygame.Rect(path[node][0]*30,path[node][1]*30, 30, 30)
             pygame.draw.rect(self.screen, color, rect)
-        print()
+        #print()
 
     def a_star_step(self):
         """
@@ -258,7 +268,6 @@ class aStar:
         astar = aStar(path=test_path, start_x=start_x, start_y=start_y, goal_x=goal_x, goal_y=goal_y)
         astar.a_star_repeated()
     
-
         running = True
         paused = False
         finished = False
@@ -271,6 +280,7 @@ class aStar:
         # Index variables to iterate over the paths and trajectory
         path_index = 0
         trajectory_index = 0
+
         # Draw the grid
         while running:
             for event in pygame.event.get():
@@ -293,7 +303,10 @@ class aStar:
                     astar.draw_blocked(blocked_path, BLACK,trajectory_index)
                     trajectory_index+=1
                 else:
-                    
+
+                    astar.draw_grid()
+                    astar.draw_blocked(blocked_path, BLACK,trajectory_index-1)
+                    astar.draw_full_path(search_path, BLUE)
                     finished = True
 
             # Clear the screen
@@ -311,7 +324,6 @@ class aStar:
 
             # Control frame rate
             self.clock.tick(1)  # Adjust as needed
-
         pygame.quit()
 
 if __name__ == "__main__":
